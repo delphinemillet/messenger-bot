@@ -2,6 +2,15 @@ const Router = require('koa-router')
 
 const router = new Router()
 
+router.get('/', ctx => {
+  ctx.body = `
+    <html>
+      <head><title>Messenger bot</title></head>
+      <body><h1>Hello Messenger!</h1></body>
+    </html>
+  `
+})
+
 // Accepts GET requests at the /webhook endpoint
 router.get('/webhook', async ctx => {
   /** UPDATE YOUR VERIFY TOKEN **/
