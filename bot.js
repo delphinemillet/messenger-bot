@@ -48,6 +48,10 @@ router.post('/webhook', ctx => {
       // will only ever contain one message, so we get index 0
       let webhook_event = entry.messaging[0]
       console.log(webhook_event)
+
+      if (webhook_event.message) {
+        handleMessage(webhook_event.sender.id, webhook_event.message)
+      }
     })
 
     // Returns a '200 OK' response to all requests
@@ -58,5 +62,50 @@ router.post('/webhook', ctx => {
     ctx.status = 404
   }
 })
+
+function handleMessage(sender_psid, received_message) {
+  let response
+
+  // Check if the message contains text
+  if (received_message.text) {
+    // Create the payload for a basic text message
+    response = {
+      text: `You sent the message: "${received_message.text}"`
+    }
+  }
+
+  // Sends the response message
+  callSendAPI(sender_psid, response)
+}
+
+function callSendAPI(sender_psid, response) {
+  // Construct the message body
+  let request_body = {
+    recipient: {
+      id: sender_psid
+    },
+    message: response
+  }
+
+  // Send the HTTP request to the Messenger Platform
+  request(
+    {
+      uri: 'https://graph.facebook.com/v2.6/me/messages',
+      qs: {
+        access_token:
+          'EAAePmQOffSMBAFeT1zPJL1FZAioSiZBW60e1LGhW3WTbeznyVHYhYe0zPrzAWLRsYZCK3YAuMgBQPALOYPrmS8rwf9VbudWPLKQsOErSZApb0gveDlpe9m2n6QsdCdYXeeFQ1qeXY7lb8qKy7Xg2Ip0AVDpAm0gsYb6EntZAIeQZDZD'
+      },
+      method: 'POST',
+      json: request_body
+    },
+    (err, res, body) => {
+      if (!err) {
+        console.log('message sent!')
+      } else {
+        console.error('Unable to send message:' + err)
+      }
+    }
+  )
+}
 
 module.exports = router
