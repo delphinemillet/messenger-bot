@@ -1,7 +1,12 @@
 const Router = require('koa-router')
 const request = require('request')
+const getBalance = require('./services/getBalance')
 
 const router = new Router()
+
+const MESSAGES = {
+  BALANCE = 'solde',
+}
 
 router.get('/', ctx => {
   ctx.body = `
@@ -38,7 +43,7 @@ router.get('/webhook', async ctx => {
 })
 
 // Creates the endpoint for our webhook
-router.post('/webhook', ctx => {
+router.post('/webhook', async (ctx) => {
   let body = ctx.request.body
 
   // Checks this is an event from a page subscription
@@ -50,8 +55,9 @@ router.post('/webhook', ctx => {
       let webhook_event = entry.messaging[0]
       console.log(webhook_event)
 
-      if (webhook_event.message) {
-        handleMessage(webhook_event.sender.id, webhook_event.message)
+      if (webhook_event.message.contains(MESSAGES.BALANCE) ) {
+        const balance = (await getBalance()).data
+        await handleMessage(webhook_event.sender.id, balance)
       }
     })
 
