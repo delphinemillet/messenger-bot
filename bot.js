@@ -5,7 +5,7 @@ const getBalance = require('./services/getBalance')
 const router = new Router()
 
 const MESSAGES = {
-  BALANCE = 'solde',
+  BALANCE: 'solde',
 }
 
 router.get('/', ctx => {
@@ -58,6 +58,8 @@ router.post('/webhook', async (ctx) => {
       if (webhook_event.message.contains(MESSAGES.BALANCE) ) {
         const balance = (await getBalance()).data
         await handleMessage(webhook_event.sender.id, balance)
+      } else {
+        handleMessage(webhook_event.sender.id, webhook_event.message)
       }
     })
 
